@@ -1,0 +1,11 @@
+services:
+    app:
+        container_name: boatman-test-container
+        build:
+            context: .
+            dockerfile: Dockerfile
+        volumes:
+            - ./public_html:/var/www/html
+        ports:
+            - "3000:80"
+        tty: true

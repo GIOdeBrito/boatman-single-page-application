@@ -1,0 +1,13 @@
+
+article#app-body {
+	margin: 1rem;
+	transition: opacity 200ms ease;
+}
+
+article#app-body.fade-out {
+	opacity: 0;
+}
+
+article#app-body.fade-in {
+	opacity: 1;
+}
