@@ -66,7 +66,11 @@ class Views
 		})
 		.onbeforeunload(() => {
 
-			console.log('unloaded');
+			console.log('before unload');
+		})
+		.onafterunload(() => {
+
+			console.log('after unload');
 		})
 		.render();
 	}

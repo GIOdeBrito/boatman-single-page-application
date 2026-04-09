@@ -1,6 +1,6 @@
 /**
- * @file Boatman routing with hash or clean filepaths + basePath support
- * @author Giordano de Brito
+ * @file Boatman routing with URL hash or filepath
+ * @author Giordano de Brito | Grok
  */
 "use strict";
 
@@ -8,10 +8,10 @@ class Routes {
     static #registered = [];
     static #fallback = '';
     static #exception = '';
-    static #basePath = '';   // new
+    static #basePath = '';
 
     static setBasePath(base) {
-        this.#basePath = (base || '').replace(/\/+$/, ''); // clean trailing slashes
+        this.#basePath = (base || '').replace(/\/+$/, '');
     }
 
     static getBasePath() {
@@ -23,10 +23,21 @@ class Routes {
         this.#registered.push({ path, callback, schema, middlewares });
     }
 
-    static setFallBackRoute(path) { this.#fallback = path; }
-    static getFallBackRoute() { return this.#fallback; }
-    static setExceptionRoute(path) { this.#exception = path; }
-    static getExceptionRoute() { return this.#exception; }
+    static setFallBackRoute(path) {
+        this.#fallback = path;
+    }
+
+    static getFallBackRoute() {
+        return this.#fallback;
+    }
+
+    static setExceptionRoute(path) {
+        this.#exception = path;
+    }
+
+    static getExceptionRoute() {
+        return this.#exception;
+    }
 
     static getMatchingRoute(response) {
         return this.#registered.find(x => this.routeCompare(x.schema, response.schema));
@@ -35,25 +46,36 @@ class Routes {
     static getRouteParameters(routeSchema, routeArray) {
         const obj = {};
         routeSchema.forEach((x, i) => {
-            if (x.startsWith('?')) obj[x.replace('?', '')] = routeArray[i];
+            if (x.startsWith('?')) {
+                obj[x.replace('?', '')] = routeArray[i];
+            }
         });
         return obj;
     }
 
     static routeCompare(routeArray, routeArrayCompare) {
-        if (routeArray.length !== routeArrayCompare.length) return false;
+        if (routeArray.length !== routeArrayCompare.length) {
+            return false;
+        }
         for (let i = 0; i < routeArray.length; i++) {
             const a = routeArray[i];
             const b = routeArrayCompare[i];
-            if (a.startsWith('?') || b.startsWith('?')) continue;
-            if (a !== b) return false;
+            if (a.startsWith('?') || b.startsWith('?')) {
+                continue;
+            }
+            if (a !== b) {
+                return false;
+            }
         }
         return true;
     }
 }
 
 class Response {
-    #path; #pathArray; #args = {}; #query = {};
+    #path;
+    #pathArray;
+    #args = {};
+    #query = {};
 
     constructor(path, pathArray, args) {
         this.#path = path;
@@ -61,24 +83,44 @@ class Response {
         this.#args = args ?? {};
     }
 
-    setQuery(obj) { this.#query = obj; }
-    get path() { return this.#path; }
-    get schema() { return this.#pathArray; }
-    get args() { return this.#args; }
-    get query() { return this.#query; }
+    setQuery(obj) {
+        this.#query = obj;
+    }
+
+    get path() {
+        return this.#path;
+    }
+
+    get schema() {
+        return this.#pathArray;
+    }
+
+    get args() {
+        return this.#args;
+    }
+
+    get query() {
+        return this.#query;
+    }
 }
 
 class Middlewares {
     static #registeredMiddlewares = [];
-    static getMiddlewares() { return this.#registeredMiddlewares; }
-    static addMiddleware(callback) { this.#registeredMiddlewares.push(callback); }
+
+    static getMiddlewares() {
+        return this.#registeredMiddlewares;
+    }
+
+    static addMiddleware(callback) {
+        this.#registeredMiddlewares.push(callback);
+    }
 }
 
 class Router {
     static #args;
     static #currentPath;
     static useHash = true;
-    static #basePath = '';   // new
+    static #basePath = '';
 
     static setBasePath(base) {
         Routes.setBasePath(base);
@@ -96,8 +138,9 @@ class Router {
 
     static goTo(path, args = {}) {
         this.#args = args;
-        const fullPath = this.#basePath ? this.#basePath + (path === '/' ? '' : path) : path;
-
+        const fullPath = this.#basePath
+            ? this.#basePath + (path === '/' ? '' : path)
+            : path;
         if (this.useHash) {
             window.location.hash = fullPath;
         } else {
@@ -113,8 +156,6 @@ class Router {
         } else {
             raw = window.location.pathname.trim() || '/';
         }
-
-        // Strip basePath when in filepath mode
         if (!this.useHash && this.#basePath && raw.startsWith(this.#basePath)) {
             raw = raw.slice(this.#basePath.length) || '/';
         }
@@ -123,7 +164,9 @@ class Router {
 
     static routeParsing() {
         let hash = this.getHash();
-        if (!hash) hash = '/';
+        if (!hash) {
+            hash = '/';
+        }
 
         const pathArray = hash.split('/').filter(Boolean);
         const response = new Response(hash, pathArray, this.#args);
@@ -151,39 +194,70 @@ class Router {
         next();
     }
 
-    static getPath() { return this.#currentPath; }
+    static getPath() {
+        return this.#currentPath;
+    }
 }
 
 export default new class {
-    constructor() { console.log('Instantiated boatman'); }
+    constructor() {
+        console.log('Instantiated boatman');
+    }
 
-    getCurrentHash() { return Router.getHash(); }
-    getCurrentPath() { return Router.getPath(); }
+    getCurrentHash() {
+        return Router.getHash();
+    }
+
+    getCurrentPath() {
+        return Router.getPath();
+    }
 
     route(path, callback = () => {}, options = {}) {
         Routes.addRoute(path, callback, options.middlewares ?? []);
-        if (options.exception) this.exception(path);
-        if (options.fallback) this.fallback(path);
+        if (options.exception) {
+            this.exception(path);
+        }
+        if (options.fallback) {
+            this.fallback(path);
+        }
     }
 
-    fallback(path) { Routes.setFallBackRoute(path); }
-    exception(path) { Routes.setExceptionRoute(path); }
+    fallback(path) {
+        Routes.setFallBackRoute(path);
+    }
 
-    use(callback) { Middlewares.addMiddleware(callback); }
+    exception(path) {
+        Routes.setExceptionRoute(path);
+    }
 
-    useHash() { Router.useHash = true; }
-    useFilePath() { Router.useHash = false; }
+    use(callback) {
+        Middlewares.addMiddleware(callback);
+    }
 
-    setBasePath(base) { Router.setBasePath(base); }   // new public method
+    useHash() {
+        Router.useHash = true;
+    }
 
-    goto(path, args = {}) { Router.goTo(path, args); }
+    useFilePath() {
+        Router.useHash = false;
+    }
+
+    setBasePath(base) {
+        Router.setBasePath(base);
+    }
+
+    goto(path, args = {}) {
+        Router.goTo(path, args);
+    }
 
     throw(message = "An unexpected error occurred") {
         Router.goTo(Routes.getExceptionRoute() || '', { message });
         throw new Error(message);
     }
 
-    reload() { Router.routeParsing(); }
+    reload() {
+        Router.routeParsing();
+    }
 
     run() {
         console.log('Running boatman');

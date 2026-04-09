@@ -9,3 +9,28 @@ services:
         ports:
             - "3000:80"
         tty: true
+        profiles: [ "dev", "release" ]
+
+    node-webpack-bundler-dev:
+        container_name: webpack-bundler-dev
+        build:
+            context: ./webpack-bundler
+            dockerfile: Dockerfile
+        volumes:
+            - ./sourcejs:/app/sourcejs
+            - ./public_html/bundles:/app/outdir
+        working_dir: /app
+        command: npm run dev
+        profiles: [ "dev" ]
+
+    node-webpack-bundler-release:
+        container_name: webpack-bundler-release
+        build:
+            context: ./webpack-bundler
+            dockerfile: Dockerfile
+        volumes:
+            - ./sourcejs:/app/sourcejs
+            - ./public_html/bundles:/app/outdir
+        working_dir: /app
+        command: npm run build
+        profiles: [ "release" ]

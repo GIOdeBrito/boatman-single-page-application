@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Boatman test</title>
-		<script type="module" src="/src/entrypoint.js"></script>
+		<script type="module" src="/bundles/main.bundle.js?v=<?= filemtime(__DIR__ . '/bundles/main.bundle.js') ?>"></script>
 		<link rel="stylesheet" href="/style/main.css">
 	</head>
 
