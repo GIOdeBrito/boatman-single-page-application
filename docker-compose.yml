@@ -12,7 +12,7 @@ services:
         profiles: [ "dev", "release" ]
 
     node-webpack-bundler-dev:
-        container_name: webpack-bundler-dev
+        container_name: boatman-webpack-bundler-dev
         build:
             context: ./webpack-bundler
             dockerfile: Dockerfile
@@ -24,7 +24,7 @@ services:
         profiles: [ "dev" ]
 
     node-webpack-bundler-release:
-        container_name: webpack-bundler-release
+        container_name: boatman-webpack-bundler-release
         build:
             context: ./webpack-bundler
             dockerfile: Dockerfile

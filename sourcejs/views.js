@@ -6,30 +6,50 @@
 class ViewRenderer
 {
     static #body;
-    static #cachedViews = {};  // name -> {html: string, elements: Node[]}
+    static #cachedViews = {};
     static #currentView;
     static #dataTagName = 'data-view';
 
-    static setViewTagName(value) { this.#dataTagName = value; }
-    static getViewTagName() { return this.#dataTagName; }
+    static setViewTagName(value)
+    {
+        this.#dataTagName = value;
+    }
 
-    static setBody(body) { this.#body = body; }
-    static getBody() { return this.#body; }
-    static getCurrentRenderedView() { return this.#currentView; }
+    static getViewTagName()
+    {
+        return this.#dataTagName;
+    }
 
-    static clearBody() {
+    static setBody(body)
+    {
+        this.#body = body;
+    }
+
+    static getBody()
+    {
+        return this.#body;
+    }
+
+    static getCurrentRenderedView()
+    {
+        return this.#currentView;
+    }
+
+    static clearBody()
+    {
         this.#body.innerHTML = "";
     }
 
-    static async render(view) {
+    static async render(view)
+    {
         const name = view.getName();
 
-        // Use cached version if available
-        if (this.#cachedViews[name]) {
+        if (this.#cachedViews[name])
+        {
             view.setElements(this.#cachedViews[name].elements);
         }
-        // Fetch and cache otherwise
-        else {
+        else
+        {
             await view.fetchHTML();
             this.#cachedViews[name] = {
                 html: view.getHTML(),
@@ -60,65 +80,109 @@ class View
     #onafterunloadfunc = () => {};
     #isRendered = false;
 
-    constructor(name) {
+    constructor(name)
+    {
         this.#name = name;
     }
 
-    async fetchHTML() {
+    async fetchHTML()
+    {
         const res = await fetch(`${this.#name}`);
-        if (!res.ok) throw new Error(`Failed to fetch view: ${this.#name}`);
+
+        if (!res.ok)
+        {
+            throw new Error(`Failed to fetch view: ${this.#name}`);
+        }
+
         this.#html = await res.text();
         this.#parseHTML();
     }
 
-    #parseHTML() {
+    #parseHTML()
+    {
         const template = document.createElement('template');
         template.innerHTML = this.#html;
         this.#elements = [...template.content.children].map(x => x.cloneNode(true));
     }
 
-    getName() { return this.#name; }
-    getElements() { return this.#elements; }
-    getHTML() { return this.#html; }
+    getName()
+    {
+        return this.#name;
+    }
 
-    setElements(elements) { this.#elements = elements; }
+    getElements()
+    {
+        return this.#elements;
+    }
 
-    isRendered() { return this.#isRendered; }
+    getHTML()
+    {
+        return this.#html;
+    }
 
-    onload(callback) { this.#onloadfunc = callback; return this; }
-    onbeforeunload(callback) { this.#onbeforeunloadfunc = callback; return this; }
-    onafterunload(callback) { this.#onafterunloadfunc = callback; return this; }
+    setElements(elements)
+    {
+        this.#elements = elements;
+    }
 
-    async render() {
+    isRendered()
+    {
+        return this.#isRendered;
+    }
+
+    onload(callback)
+    {
+        this.#onloadfunc = callback;
+        return this;
+    }
+
+    onbeforeunload(callback)
+    {
+        this.#onbeforeunloadfunc = callback;
+        return this;
+    }
+
+    onafterunload(callback)
+    {
+        this.#onafterunloadfunc = callback;
+        return this;
+    }
+
+    async render()
+    {
         await ViewRenderer.render(this);
         this.#isRendered = true;
     }
 
-	_onloadExec() {
-		this.#onloadfunc?.(ViewRenderer.getBody());
-	}
+    _onloadExec()
+    {
+        this.#onloadfunc?.(ViewRenderer.getBody());
+    }
 
-    _onbeforeunloadExec() {
+    _onbeforeunloadExec()
+    {
         this.#onbeforeunloadfunc?.();
         this.#isRendered = false;
     }
 
-    _onafterunloadExec() {
+    _onafterunloadExec()
+    {
         this.#onafterunloadfunc?.();
         this.#isRendered = false;
     }
 }
 
-export default new class {
+export default new class
+{
 
-	view (name)
-	{
-		return new View(name);
-	}
+    view (name)
+    {
+        return new View(name);
+    }
 
-	renderer ()
-	{
-		return ViewRenderer;
-	}
+    renderer ()
+    {
+        return ViewRenderer;
+    }
 
 }();

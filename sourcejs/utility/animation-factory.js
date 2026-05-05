@@ -19,165 +19,163 @@ const CLASS_SUFIX = '__factory___class';
 
 class Utility
 {
-	static getRandomName (prefix = '')
-	{
-		return prefix + String(Date.now());
-	}
+    static getRandomName(prefix = '')
+    {
+        return prefix + String(Date.now());
+    }
 
-	static objectToFormatedStyleValues (obj)
-	{
-		return Object.keys(obj).map(x => {
+    static objectToFormatedStyleValues(obj)
+    {
+        return Object.keys(obj).map(x =>
+        {
+            const value = obj[x];
 
-			const value = obj[x];
+            return `${x}: ${value};`;
+        }).join('');
+    }
 
-			return `${x}: ${value};`;
-		}).join('');
-	}
+    static createStyleElement(data, settings, classname, keyframesname)
+    {
+        const style = document.createElement('style');
+        style.appendChild(document.createTextNode(`
+            @keyframes ${keyframesname} {
+                ${data}
+            }
+            .${classname} {
+                animation-name: ${keyframesname};
+                ${settings}
+            }
+        `));
 
-	static createStyleElement (data, settings, classname, keyframesname)
-	{
-		const style = document.createElement('style');
-		style.appendChild(document.createTextNode(`
-			@keyframes ${keyframesname} {
-				${data}
-			}
-			.${classname} {
-				animation-name: ${keyframesname};
-				${settings}
-			}
-		`));
+        document.head.appendChild(style);
 
-		document.head.appendChild(style);
-
-		return style;
-	}
+        return style;
+    }
 }
 
 class AnimationInstance
 {
-	#element;
+    #element;
 
-	// Animation data
-	#data = '';
-	#isOnce = false;
+    #data = '';
+    #isOnce = false;
 
-	// Animation settings
-	#settings = {
-		'animation-duration': '',
-		'animation-direction': 'normal',
-		'animation-iteration-count': 'initial',
-		'animation-fill-mode': 'none',
-		'animation-timing-function': 'none'
-	};
+    #settings = {
+        'animation-duration': '',
+        'animation-direction': 'normal',
+        'animation-iteration-count': 'initial',
+        'animation-fill-mode': 'none',
+        'animation-timing-function': 'none'
+    };
 
-	#onendcallback = [];
+    #onendcallback = [];
 
-	constructor (element)
-	{
-		this.#element = element;
-	}
+    constructor(element)
+    {
+        this.#element = element;
+    }
 
-	rule (time, value)
-	{
-		this.#data += `${time} { ${value}; }`;
-		return this;
-	}
+    rule(time, value)
+    {
+        this.#data += `${time} { ${value}; }`;
+        return this;
+    }
 
-	duration (value)
-	{
-		this.#settings['animation-duration'] = (value * 1000) + 'ms';
-		return this;
-	}
+    duration(value)
+    {
+        this.#settings['animation-duration'] = (value * 1000) + 'ms';
+        return this;
+    }
 
-	timing (value)
-	{
-		this.#settings['animation-timing-function'] = value;
-		return this;
-	}
+    timing(value)
+    {
+        this.#settings['animation-timing-function'] = value;
+        return this;
+    }
 
-	smooth ()
-	{
-		this.#settings['animation-timing-function'] = 'ease';
-		return this;
-	}
+    smooth()
+    {
+        this.#settings['animation-timing-function'] = 'ease';
+        return this;
+    }
 
-	smoothInOut ()
-	{
-		this.#settings['animation-timing-function'] = 'ease-in-out';
-		return this;
-	}
+    smoothInOut()
+    {
+        this.#settings['animation-timing-function'] = 'ease-in-out';
+        return this;
+    }
 
-	keep ()
-	{
-		this.#settings['animation-fill-mode'] = 'forwards';
-		this.#isOnce = true;
-		return this;
-	}
+    keep()
+    {
+        this.#settings['animation-fill-mode'] = 'forwards';
+        this.#isOnce = true;
+        return this;
+    }
 
-	reverse ()
-	{
-		this.#settings['animation-direction'] = 'backwards';
-		return this;
-	}
+    reverse()
+    {
+        this.#settings['animation-direction'] = 'backwards';
+        return this;
+    }
 
-	pingpong ()
-	{
-		this.#settings['animation-direction'] = 'alternate';
-		this.#settings['animation-iteration-count'] = 'infinite';
-		return this;
-	}
+    pingpong()
+    {
+        this.#settings['animation-direction'] = 'alternate';
+        this.#settings['animation-iteration-count'] = 'infinite';
+        return this;
+    }
 
-	repeat (times = 1)
-	{
-		if(this.#settings['animation-iteration-count'] !== 'infinite')
-		{
-			this.#settings['animation-iteration-count'] = times;
-		}
+    repeat(times = 1)
+    {
+        if (this.#settings['animation-iteration-count'] !== 'infinite')
+        {
+            this.#settings['animation-iteration-count'] = times;
+        }
 
-		return this;
-	}
+        return this;
+    }
 
-	onend (func)
-	{
-		this.#onendcallback.push(func);
-		return this;
-	}
+    onend(func)
+    {
+        this.#onendcallback.push(func);
+        return this;
+    }
 
-	play ()
-	{
-		const name = Utility.getRandomName('anim_');
-		const classname = name + CLASS_SUFIX;
-		const keyframesname = name + KEYFRAMES_SUFIX;
+    play()
+    {
+        const name = Utility.getRandomName('anim_');
+        const classname = name + CLASS_SUFIX;
+        const keyframesname = name + KEYFRAMES_SUFIX;
 
-		const settings = Utility.objectToFormatedStyleValues(this.#settings);
-		const style = Utility.createStyleElement(this.#data, settings, classname, keyframesname);
+        const settings = Utility.objectToFormatedStyleValues(this.#settings);
+        const style = Utility.createStyleElement(this.#data, settings, classname, keyframesname);
 
-		const element = this.#element;
+        const element = this.#element;
 
-		element.classList.add(classname);
+        element.classList.add(classname);
 
-		const function_OnEnd = () => {
+        const function_OnEnd = () =>
+        {
 
-			this.#onendcallback.forEach(x => x?.());
+            this.#onendcallback.forEach(x => x?.());
 
-			this.#element.removeEventListener('animationend', function_OnEnd);
+            this.#element.removeEventListener('animationend', function_OnEnd);
 
-			if(!this.#isOnce)
-			{
-				element.classList.remove(classname);
-				style.remove();
-			}
-		};
+            if (!this.#isOnce)
+            {
+                element.classList.remove(classname);
+                style.remove();
+            }
+        };
 
-		this.#element.addEventListener('animationend', function_OnEnd);
-	}
+        this.#element.addEventListener('animationend', function_OnEnd);
+    }
 }
 
 export default class {
 
-	static new (element)
-	{
-		return new AnimationInstance(element);
-	}
-
+    static new (element)
+    {
+        return new AnimationInstance(element);
+    }
 };
